@@ -94,17 +94,20 @@ services:
         condition: service_completed_successfully
     environment:
       <<: *common-env
-    command: >
-      mlflow server
+    entrypoint: >
+      /bin/sh -c "
+      pip install --no-cache-dir psycopg2-binary &&
+      exec mlflow server
       --backend-store-uri postgresql://${POSTGRES_USER:-mlops}:${POSTGRES_PASSWORD:-mlops_secret}@postgres:5432/${POSTGRES_DB:-mlops_db}
       --default-artifact-root s3://mlflow-artifacts
       --host 0.0.0.0
       --port 5000
       --serve-artifacts
+      "
     ports:
       - "5000:5000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -246,6 +249,8 @@ services:
     image: voxel51/fiftyone:latest
     container_name: skin-mlops-fiftyone
     restart: unless-stopped
+    stdin_open: true
+    tty: true
     volumes:
       - ./data:/app/data:ro
       - ./fiftyone_app:/app/fiftyone_app:ro
@@ -282,7 +287,7 @@ services:
     working_dir: /project
     environment:
       <<: *common-env
-    command: ["tail", "-f", "/dev/null"]  # Keep alive for manual runs
+    entrypoint: ["tail", "-f", "/dev/null"]  # Keep alive for manual runs
     networks:
       - mlops-net
 
