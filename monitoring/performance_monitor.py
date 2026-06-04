@@ -93,7 +93,9 @@ def main() -> None:
 
         print(f"Fetching predictions from last {args.hours} hours...")
         conn = get_db_connection()
-        predictions = fetch_recent_predictions(conn, hours=args.hours, model_version=args.model_version)
+        predictions = fetch_recent_predictions(
+            conn, hours=args.hours, model_version=args.model_version
+        )
         conn.close()
     except Exception as e:
         print(f"⚠ Could not connect to database: {e}")

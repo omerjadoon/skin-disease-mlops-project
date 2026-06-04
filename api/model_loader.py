@@ -101,9 +101,7 @@ class ModelLoader:
                 print(f"Local checkpoint not found: {ckpt_path}")
                 return False
 
-            self.model = SkinSeverityClassifier.load_from_checkpoint(
-                str(path), map_location="cpu"
-            )
+            self.model = SkinSeverityClassifier.load_from_checkpoint(str(path), map_location="cpu")
             self.model.eval()
             self.model_version = "local"
             self.model_info = {
@@ -112,7 +110,9 @@ class ModelLoader:
                 "backbone": getattr(self.model, "hparams", {}).get("backbone", "resnet18"),
                 "num_classes": getattr(self.model, "num_classes", 3),
                 "class_names": getattr(
-                    self.model, "class_names", config.get("class_names", ["mild", "moderate", "severe"])
+                    self.model,
+                    "class_names",
+                    config.get("class_names", ["mild", "moderate", "severe"]),
                 ),
                 "input_size": [224, 224],
                 "mlflow_tracking_uri": None,

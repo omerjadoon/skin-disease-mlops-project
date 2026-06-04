@@ -73,9 +73,7 @@ def generate_synthetic_skin_image(
         x = random.randint(10, img_size - 10)
         y = random.randint(10, img_size - 10)
         r = random.randint(5, 20)
-        spot_color = tuple(
-            max(0, min(255, c + random.randint(-40, -10))) for c in base_color
-        )
+        spot_color = tuple(max(0, min(255, c + random.randint(-40, -10))) for c in base_color)
         draw.ellipse([x - r, y - r, x + r, y + r], fill=spot_color)
 
     # Apply blur for realistic look
@@ -141,13 +139,15 @@ def seed_sample_data(
             disease = diseases[i % len(diseases)]
             patient_id = f"synthetic_p{total + 1:04d}"
 
-            csv_rows.append({
-                "image_path": str(img_path),
-                "severity": severity,
-                "disease_label": disease,
-                "patient_id": patient_id,
-                "split": split,
-            })
+            csv_rows.append(
+                {
+                    "image_path": str(img_path),
+                    "severity": severity,
+                    "disease_label": disease,
+                    "patient_id": patient_id,
+                    "split": split,
+                }
+            )
             total += 1
 
         print(f"    ✓ {images_per_class} images saved to {class_dir}")

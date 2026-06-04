@@ -94,7 +94,9 @@ def main() -> None:
     artifact_dir.mkdir(parents=True, exist_ok=True)
     eval_path = artifact_dir / "eval_metrics.json"
     with open(eval_path, "w") as f:
-        json.dump({k: float(v) if hasattr(v, "item") else v for k, v in metrics.items()}, f, indent=2)
+        json.dump(
+            {k: float(v) if hasattr(v, "item") else v for k, v in metrics.items()}, f, indent=2
+        )
     print(f"\n✓ Evaluation metrics saved: {eval_path}")
 
     # Log to MLflow if available

@@ -202,9 +202,16 @@ def log_model_performance(
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
             (
-                model_name, model_version, split,
-                accuracy, f1_macro, precision_macro, recall_macro,
-                auroc, loss, num_samples,
+                model_name,
+                model_version,
+                split,
+                accuracy,
+                f1_macro,
+                precision_macro,
+                recall_macro,
+                auroc,
+                loss,
+                num_samples,
             ),
         )
     conn.commit()

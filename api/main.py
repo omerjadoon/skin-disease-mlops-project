@@ -34,6 +34,7 @@ from api.schemas import (
 
 # ─── Config ───────────────────────────────────────────────────
 
+
 def load_config() -> dict:
     config_path = Path("configs/api.yaml")
     if config_path.exists():
@@ -142,6 +143,7 @@ def log_prediction_to_db(log: PredictionLog, source_ip: str | None = None) -> No
 
 # ─── Lifespan ─────────────────────────────────────────────────
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Load model on startup."""
@@ -187,6 +189,7 @@ app.add_middleware(
 )
 
 # ─── Routes ───────────────────────────────────────────────────
+
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check() -> HealthResponse:

@@ -98,8 +98,10 @@ def trigger_if_drift_detected(
 
     report = detect_drift(baseline, current, method=method)
 
-    print(f"Drift report: score={report.get('drift_score', 0):.4f}, "
-          f"level={report.get('drift_level', 'unknown')}")
+    print(
+        f"Drift report: score={report.get('drift_score', 0):.4f}, "
+        f"level={report.get('drift_level', 'unknown')}"
+    )
 
     if report.get("drift_detected", False):
         write_retraining_signal(
@@ -115,15 +117,18 @@ def trigger_if_drift_detected(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Retraining trigger for drift detection")
-    parser.add_argument("--check-drift", action="store_true",
-                        help="Run drift detection and trigger if needed")
+    parser.add_argument(
+        "--check-drift", action="store_true", help="Run drift detection and trigger if needed"
+    )
     parser.add_argument("--baseline-hours", type=int, default=168)
     parser.add_argument("--current-hours", type=int, default=24)
     parser.add_argument("--method", type=str, default="psi", choices=["psi", "kl"])
-    parser.add_argument("--clear-signal", action="store_true",
-                        help="Clear the retraining signal after retraining")
-    parser.add_argument("--check-signal", action="store_true",
-                        help="Check if a retraining signal is pending")
+    parser.add_argument(
+        "--clear-signal", action="store_true", help="Clear the retraining signal after retraining"
+    )
+    parser.add_argument(
+        "--check-signal", action="store_true", help="Check if a retraining signal is pending"
+    )
     args = parser.parse_args()
 
     if args.clear_signal:

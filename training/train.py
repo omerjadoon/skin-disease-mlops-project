@@ -214,6 +214,7 @@ def main() -> None:
         if best_link.exists() or best_link.is_symlink():
             best_link.unlink()
         import shutil
+
         shutil.copy2(best_ckpt, best_link)
         print(f"\n✓ Best checkpoint saved to: {best_link}")
     else:
@@ -221,6 +222,7 @@ def main() -> None:
         last_ckpt = artifact_dir / "last.ckpt"
         if last_ckpt.exists():
             import shutil
+
             shutil.copy2(last_ckpt, artifact_dir / "model.ckpt")
 
     # Run test evaluation
@@ -233,8 +235,7 @@ def main() -> None:
     # Save metrics JSON
     if trainer.logged_metrics:
         metrics_out = {
-            k: float(v) if hasattr(v, "item") else v
-            for k, v in trainer.logged_metrics.items()
+            k: float(v) if hasattr(v, "item") else v for k, v in trainer.logged_metrics.items()
         }
         metrics_path = artifact_dir / "metrics.json"
         with open(metrics_path, "w") as f:

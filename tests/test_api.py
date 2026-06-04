@@ -1,6 +1,7 @@
 """
 Tests for the FastAPI inference API.
 """
+
 from __future__ import annotations
 
 import io
@@ -25,6 +26,7 @@ def create_test_image(width: int = 224, height: int = 224) -> bytes:
 
 # ─── Mock model loader ────────────────────────────────────────
 
+
 @pytest.fixture
 def mock_model_loader():
     """Patch the model loader to return a dummy model."""
@@ -44,6 +46,7 @@ def mock_model_loader():
 
     # Mock the model's forward pass to return dummy logits
     import torch
+
     dummy_logits = torch.tensor([[0.1, 0.7, 0.2]])
     mock_model = MagicMock()
     mock_model.return_value = dummy_logits
@@ -56,15 +59,19 @@ def mock_model_loader():
 @pytest.fixture
 def client(mock_model_loader):
     """Create TestClient with mocked model loader."""
-    with patch("api.model_loader._model_loader", mock_model_loader), \
-         patch("api.main.get_model_loader", return_value=mock_model_loader), \
-         patch("api.main.log_prediction_to_db"):
+    with (
+        patch("api.model_loader._model_loader", mock_model_loader),
+        patch("api.main.get_model_loader", return_value=mock_model_loader),
+        patch("api.main.log_prediction_to_db"),
+    ):
         from api.main import app
+
         with TestClient(app) as c:
             yield c
 
 
 # ─── Tests ────────────────────────────────────────────────────
+
 
 class TestHealthEndpoint:
     def test_health_returns_200(self, client):
@@ -182,9 +189,12 @@ class TestPredictEndpoint:
         mock_loader.model_name = "skin-severity-classifier"
         mock_loader.model_version = "none"
 
-        with patch("api.model_loader._model_loader", mock_loader), \
-             patch("api.main.get_model_loader", return_value=mock_loader):
+        with (
+            patch("api.model_loader._model_loader", mock_loader),
+            patch("api.main.get_model_loader", return_value=mock_loader),
+        ):
             from api.main import app
+
             with TestClient(app, raise_server_exceptions=False) as c:
                 image_bytes = create_test_image()
                 response = c.post(

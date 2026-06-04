@@ -124,15 +124,13 @@ def detect_drift(
         "baseline": {
             "num_samples": len(baseline_predictions),
             "distribution": {
-                class_names[i]: round(float(baseline_dist[i]), 4)
-                for i in range(len(class_names))
+                class_names[i]: round(float(baseline_dist[i]), 4) for i in range(len(class_names))
             },
         },
         "current": {
             "num_samples": len(current_predictions),
             "distribution": {
-                class_names[i]: round(float(current_dist[i]), 4)
-                for i in range(len(class_names))
+                class_names[i]: round(float(current_dist[i]), 4) for i in range(len(class_names))
             },
         },
         "per_class_shift": {
@@ -159,9 +157,15 @@ def main() -> None:
         )
 
         conn = get_db_connection()
-        print(f"Fetching baseline ({args.baseline_hours}h) and current ({args.current_hours}h) predictions...")
-        baseline = fetch_recent_predictions(conn, hours=args.baseline_hours, model_version=args.model_version)
-        current = fetch_recent_predictions(conn, hours=args.current_hours, model_version=args.model_version)
+        print(
+            f"Fetching baseline ({args.baseline_hours}h) and current ({args.current_hours}h) predictions..."
+        )
+        baseline = fetch_recent_predictions(
+            conn, hours=args.baseline_hours, model_version=args.model_version
+        )
+        current = fetch_recent_predictions(
+            conn, hours=args.current_hours, model_version=args.model_version
+        )
     except Exception as e:
         print(f"⚠ DB connection failed: {e}. Using empty data for demo.")
         baseline, current = [], []

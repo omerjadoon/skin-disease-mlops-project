@@ -160,8 +160,7 @@ class SkinDataModule(pl.LightningDataModule):
 
         if total == 0:
             raise RuntimeError(
-                f"No images found in {data_dir}. "
-                "Run 'make seed-data' to generate sample data."
+                f"No images found in {data_dir}. Run 'make seed-data' to generate sample data."
             )
 
         n_test = max(1, int(total * self.test_split))

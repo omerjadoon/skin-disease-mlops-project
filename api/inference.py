@@ -93,8 +93,7 @@ def run_inference(
     predicted_class = class_names[predicted_idx.item()]
 
     class_probabilities = {
-        class_names[i]: round(float(probs[i].item()), 4)
-        for i in range(len(class_names))
+        class_names[i]: round(float(probs[i].item()), 4) for i in range(len(class_names))
     }
 
     return {

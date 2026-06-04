@@ -1,6 +1,7 @@
 """
 Tests for inference pipeline and drift detection.
 """
+
 from __future__ import annotations
 
 import io
@@ -24,6 +25,7 @@ def create_test_image_bytes(width: int = 224, height: int = 224) -> bytes:
 class TestInferencePipeline:
     def test_preprocess_image_shape(self):
         from api.inference import preprocess_image
+
         image_bytes = create_test_image_bytes()
         tensor, image_hash = preprocess_image(image_bytes)
         assert tensor.shape == (1, 3, 224, 224)
@@ -32,6 +34,7 @@ class TestInferencePipeline:
 
     def test_preprocess_same_image_same_hash(self):
         from api.inference import preprocess_image
+
         image_bytes = create_test_image_bytes()
         _, hash1 = preprocess_image(image_bytes)
         _, hash2 = preprocess_image(image_bytes)
@@ -79,22 +82,41 @@ class TestDriftDetection:
 
     def test_no_drift_same_distribution(self):
         from monitoring.drift import detect_drift
-        baseline = self._make_preds("mild", 50) + self._make_preds("moderate", 30) + self._make_preds("severe", 20)
-        current = self._make_preds("mild", 50) + self._make_preds("moderate", 30) + self._make_preds("severe", 20)
+
+        baseline = (
+            self._make_preds("mild", 50)
+            + self._make_preds("moderate", 30)
+            + self._make_preds("severe", 20)
+        )
+        current = (
+            self._make_preds("mild", 50)
+            + self._make_preds("moderate", 30)
+            + self._make_preds("severe", 20)
+        )
         report = detect_drift(baseline, current)
         assert report["drift_detected"] is False
         assert report["drift_score"] < 0.1
 
     def test_drift_detected_shifted_distribution(self):
         from monitoring.drift import detect_drift
-        baseline = self._make_preds("mild", 80) + self._make_preds("moderate", 10) + self._make_preds("severe", 10)
-        current = self._make_preds("severe", 80) + self._make_preds("moderate", 10) + self._make_preds("mild", 10)
+
+        baseline = (
+            self._make_preds("mild", 80)
+            + self._make_preds("moderate", 10)
+            + self._make_preds("severe", 10)
+        )
+        current = (
+            self._make_preds("severe", 80)
+            + self._make_preds("moderate", 10)
+            + self._make_preds("mild", 10)
+        )
         report = detect_drift(baseline, current)
         assert report["drift_detected"] is True
         assert report["drift_score"] > 0.2
 
     def test_empty_baseline_returns_no_drift(self):
         from monitoring.drift import detect_drift
+
         current = self._make_preds("mild", 50)
         report = detect_drift([], current)
         assert report["drift_detected"] is False
@@ -102,6 +124,7 @@ class TestDriftDetection:
 
     def test_drift_report_has_required_keys(self):
         from monitoring.drift import detect_drift
+
         baseline = self._make_preds("mild", 30)
         current = self._make_preds("mild", 25) + self._make_preds("moderate", 5)
         report = detect_drift(baseline, current)
@@ -110,14 +133,24 @@ class TestDriftDetection:
 
     def test_kl_divergence_method(self):
         from monitoring.drift import detect_drift
-        baseline = self._make_preds("mild", 50) + self._make_preds("moderate", 30) + self._make_preds("severe", 20)
-        current = self._make_preds("mild", 20) + self._make_preds("moderate", 60) + self._make_preds("severe", 20)
+
+        baseline = (
+            self._make_preds("mild", 50)
+            + self._make_preds("moderate", 30)
+            + self._make_preds("severe", 20)
+        )
+        current = (
+            self._make_preds("mild", 20)
+            + self._make_preds("moderate", 60)
+            + self._make_preds("severe", 20)
+        )
         report = detect_drift(baseline, current, method="kl")
         assert "drift_score" in report
         assert report["method"] == "kl"
 
     def test_psi_function(self):
         from training.metrics import psi
+
         baseline = np.array([50.0, 30.0, 20.0])
         current = np.array([50.0, 30.0, 20.0])
         score = psi(baseline, current)
@@ -125,6 +158,7 @@ class TestDriftDetection:
 
     def test_kl_divergence_function(self):
         from training.metrics import kl_divergence
+
         p = np.array([0.5, 0.3, 0.2])
         q = np.array([0.5, 0.3, 0.2])
         score = kl_divergence(p, q)

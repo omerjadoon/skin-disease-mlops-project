@@ -1,6 +1,7 @@
 """
 Tests for the training pipeline: dataset loading, transforms, model forward pass.
 """
+
 from __future__ import annotations
 
 import sys
@@ -25,9 +26,11 @@ def create_synthetic_dataset(root_dir: Path, images_per_class: int = 5) -> None:
 
 # ─── Transform Tests ──────────────────────────────────────────
 
+
 class TestTransforms:
     def test_train_transforms_output_shape(self):
         from training.transforms import get_train_transforms
+
         transform = get_train_transforms()
         img = Image.new("RGB", (300, 300), color=(150, 100, 80))
         tensor = transform(img)
@@ -35,6 +38,7 @@ class TestTransforms:
 
     def test_val_transforms_output_shape(self):
         from training.transforms import get_val_transforms
+
         transform = get_val_transforms()
         img = Image.new("RGB", (300, 300), color=(150, 100, 80))
         tensor = transform(img)
@@ -42,6 +46,7 @@ class TestTransforms:
 
     def test_transforms_from_config(self):
         from training.transforms import build_transforms_from_config
+
         cfg = {
             "image_size": 224,
             "normalize": {"mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]},
@@ -56,6 +61,7 @@ class TestTransforms:
 
     def test_inference_transforms(self):
         from training.transforms import get_inference_transforms
+
         transform = get_inference_transforms()
         img = Image.new("RGB", (400, 300))
         tensor = transform(img)
@@ -65,16 +71,19 @@ class TestTransforms:
 
 # ─── Dataset Tests ────────────────────────────────────────────
 
+
 class TestFolderDataset:
     def test_loads_images_from_folder(self, tmp_path):
         create_synthetic_dataset(tmp_path, images_per_class=5)
         from training.datamodule import FolderSkinDataset
+
         ds = FolderSkinDataset(tmp_path, ["mild", "moderate", "severe"])
         assert len(ds) == 15
 
     def test_returns_correct_labels(self, tmp_path):
         create_synthetic_dataset(tmp_path, images_per_class=3)
         from training.datamodule import FolderSkinDataset
+
         ds = FolderSkinDataset(tmp_path, ["mild", "moderate", "severe"])
         labels = [ds[i][1] for i in range(len(ds))]
         assert set(labels) == {0, 1, 2}
@@ -86,6 +95,7 @@ class TestFolderDataset:
         img.save(tmp_path / "mild" / "test.jpg")
 
         from training.datamodule import FolderSkinDataset
+
         ds = FolderSkinDataset(tmp_path, ["mild", "moderate", "severe"])
         assert len(ds) == 1  # Only mild images
 
@@ -93,6 +103,7 @@ class TestFolderDataset:
         create_synthetic_dataset(tmp_path, images_per_class=2)
         from training.datamodule import FolderSkinDataset
         from training.transforms import get_val_transforms
+
         tf = get_val_transforms()
         ds = FolderSkinDataset(tmp_path, ["mild", "moderate", "severe"], transform=tf)
         img, _label = ds[0]
@@ -102,10 +113,12 @@ class TestFolderDataset:
 
 # ─── DataModule Tests ─────────────────────────────────────────
 
+
 class TestSkinDataModule:
     def test_setup_folder_mode(self, tmp_path):
         create_synthetic_dataset(tmp_path, images_per_class=10)
         from training.datamodule import SkinDataModule
+
         cfg = {
             "raw_data_dir": str(tmp_path),
             "processed_data_dir": str(tmp_path / "processed"),
@@ -126,6 +139,7 @@ class TestSkinDataModule:
     def test_dataloaders_return_batches(self, tmp_path):
         create_synthetic_dataset(tmp_path, images_per_class=10)
         from training.datamodule import SkinDataModule
+
         cfg = {
             "raw_data_dir": str(tmp_path),
             "processed_data_dir": str(tmp_path / "processed"),
@@ -147,9 +161,11 @@ class TestSkinDataModule:
 
 # ─── Model Tests ──────────────────────────────────────────────
 
+
 class TestSkinSeverityClassifier:
     def test_model_forward_pass(self):
         from training.model import SkinSeverityClassifier
+
         model = SkinSeverityClassifier(backbone="resnet18", num_classes=3, pretrained=False)
         model.eval()
         x = torch.randn(2, 3, 224, 224)
@@ -159,6 +175,7 @@ class TestSkinSeverityClassifier:
 
     def test_model_training_step(self):
         from training.model import SkinSeverityClassifier
+
         model = SkinSeverityClassifier(backbone="resnet18", num_classes=3, pretrained=False)
         x = torch.randn(2, 3, 224, 224)
         y = torch.tensor([0, 2])
@@ -168,6 +185,7 @@ class TestSkinSeverityClassifier:
 
     def test_model_output_probabilities(self):
         from training.model import SkinSeverityClassifier
+
         model = SkinSeverityClassifier(backbone="resnet18", num_classes=3, pretrained=False)
         model.eval()
         x = torch.randn(1, 3, 224, 224)
@@ -179,6 +197,7 @@ class TestSkinSeverityClassifier:
 
     def test_model_get_model_info(self):
         from training.model import SkinSeverityClassifier
+
         model = SkinSeverityClassifier(
             backbone="resnet18",
             num_classes=3,
@@ -192,5 +211,6 @@ class TestSkinSeverityClassifier:
 
     def test_invalid_backbone_raises(self):
         from training.model import build_backbone
+
         with pytest.raises(ValueError, match="Unsupported backbone"):
             build_backbone("invalid_backbone")
