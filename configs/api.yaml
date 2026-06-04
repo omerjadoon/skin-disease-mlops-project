@@ -1,0 +1,50 @@
+# API Configuration
+# ──────────────────────────────────────────────────────────────
+
+# Server settings
+host: "0.0.0.0"
+port: 8000
+reload: false
+workers: 1
+
+# Model loading
+model_name: "skin-severity-classifier"
+model_stage: "Production"   # Production | Staging | None
+model_local_path: "artifacts/model.ckpt"  # Fallback if MLflow not available
+model_config_path: "configs/model.yaml"
+
+# MLflow
+mlflow_tracking_uri: "http://mlflow:5000"
+
+# Inference settings
+image_size: 224
+normalize:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+# Class labels (must match training order)
+class_names:
+  - "mild"
+  - "moderate"
+  - "severe"
+
+# Prediction logging
+log_predictions: true
+prediction_log_table: "prediction_logs"
+
+# Disclaimer (included in every response)
+disclaimer: "AI-assisted severity estimate only. Not a medical diagnosis. For educational and research purposes only."
+
+# PostgreSQL (for prediction logging)
+database:
+  host: "postgres"
+  port: 5432
+  name: "mlops_db"
+  user: "mlops"
+  password: "mlops_secret"
+
+# CORS settings
+cors:
+  allow_origins: ["*"]
+  allow_methods: ["GET", "POST"]
+  allow_headers: ["*"]

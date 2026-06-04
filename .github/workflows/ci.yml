@@ -1,0 +1,148 @@
+name: CI — Skin Severity MLOps
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install lint dependencies
+        run: |
+          pip install --upgrade pip
+          pip install ruff mypy types-pyyaml
+
+      - name: Run ruff linter
+        run: ruff check training/ api/ monitoring/ scripts/ tests/
+
+      - name: Run ruff formatter check
+        run: ruff format --check training/ api/ monitoring/ scripts/ tests/
+
+      - name: Run mypy
+        run: mypy training/ api/ monitoring/ --ignore-missing-imports --no-strict-optional
+        continue-on-error: true  # Type errors are warnings in early stage
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-test-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install CPU-only PyTorch and dependencies
+        run: |
+          pip install --upgrade pip
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install pytorch-lightning torchmetrics fastapi "uvicorn[standard]" \
+            pydantic pydantic-settings mlflow boto3 psycopg2-binary pyyaml pillow \
+            python-multipart python-dotenv pandas scikit-learn scipy numpy \
+            pytest pytest-asyncio pytest-cov httpx omegaconf
+
+      - name: Run config validation tests
+        run: pytest tests/test_data_validation.py -v -k "Config" --tb=short
+
+      - name: Run training tests (no GPU)
+        run: pytest tests/test_training.py -v --tb=short -x
+
+      - name: Run inference tests
+        run: pytest tests/test_inference.py -v --tb=short
+
+      - name: Run API tests (mocked model)
+        run: pytest tests/test_api.py -v --tb=short
+
+      - name: Upload coverage
+        run: |
+          pip install pytest-cov
+          pytest tests/ --cov=training --cov=api --cov=monitoring \
+            --cov-report=xml --cov-report=term-missing -q || true
+
+  validate-dag-syntax:
+    name: Validate Airflow DAG Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Airflow (lightweight)
+        run: |
+          pip install --upgrade pip
+          pip install "apache-airflow==2.8.0" --constraint \
+            "https://raw.githubusercontent.com/apache/airflow/constraints-2.8.0/constraints-3.11.txt" \
+            --no-deps || pip install apache-airflow
+
+      - name: Validate DAG syntax
+        run: |
+          for dag_file in pipelines/airflow/dags/*.py; do
+            echo "Checking: $dag_file"
+            python -c "import ast; ast.parse(open('$dag_file').read())" && echo "  ✓ Syntax OK"
+          done
+
+  validate-configs:
+    name: Validate YAML Configs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pyyaml
+        run: pip install pyyaml
+
+      - name: Validate all YAML files
+        run: |
+          for yaml_file in configs/*.yaml pipelines/meltano/meltano.yml dvc.yaml; do
+            echo "Validating: $yaml_file"
+            python -c "import yaml; yaml.safe_load(open('$yaml_file'))" && echo "  ✓ Valid YAML"
+          done
+
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -f api/Dockerfile -t skin-severity-api:ci .
+        continue-on-error: true
+
+      - name: Build Trainer image
+        run: docker build -f training/Dockerfile -t skin-severity-trainer:ci .
+        continue-on-error: true

@@ -1,0 +1,73 @@
+schema: "2.0"
+
+stages:
+  prepare_data:
+    cmd: python scripts/seed_sample_data.py
+    deps:
+      - scripts/seed_sample_data.py
+      - configs/data.yaml
+    outs:
+      - data/raw
+      - data/processed
+    desc: "Generate or prepare raw and processed data"
+
+  qc_data:
+    cmd: python fiftyone_app/qc_report.py
+    deps:
+      - fiftyone_app/qc_report.py
+      - fiftyone_app/load_dataset.py
+      - data/raw
+      - configs/data.yaml
+    outs:
+      - data/qc_report.html
+    desc: "Run FiftyOne quality-control checks on raw data"
+
+  train:
+    cmd: python training/train.py --config configs/train.yaml
+    deps:
+      - training/train.py
+      - training/model.py
+      - training/datamodule.py
+      - training/transforms.py
+      - training/metrics.py
+      - data/processed
+      - configs/train.yaml
+      - configs/model.yaml
+      - configs/data.yaml
+    outs:
+      - artifacts/model.ckpt
+    metrics:
+      - artifacts/metrics.json:
+          cache: false
+    desc: "Train ResNet18 severity classifier and log to MLflow"
+
+  evaluate:
+    cmd: python training/evaluate.py --config configs/train.yaml
+    deps:
+      - training/evaluate.py
+      - training/model.py
+      - training/datamodule.py
+      - artifacts/model.ckpt
+      - configs/train.yaml
+      - data/processed
+    metrics:
+      - artifacts/eval_metrics.json:
+          cache: false
+    desc: "Evaluate trained model on validation/test set"
+
+  register_model:
+    cmd: >
+      python -c "
+      import mlflow
+      import os
+      mlflow.set_tracking_uri(os.environ.get('MLFLOW_TRACKING_URI', 'http://localhost:5000'))
+      result = mlflow.register_model(
+          model_uri='runs:/' + open('artifacts/run_id.txt').read().strip() + '/model',
+          name='skin-severity-classifier'
+      )
+      print(f'Registered model version: {result.version}')
+      "
+    deps:
+      - artifacts/model.ckpt
+      - artifacts/run_id.txt
+    desc: "Register best model in MLflow Model Registry"

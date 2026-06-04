@@ -1,0 +1,70 @@
+version: "1.0"
+
+project_id: "skin-severity-mlops-meltano"
+
+default_environment: dev
+
+environments:
+  - name: dev
+  - name: staging
+  - name: prod
+
+plugins:
+  extractors:
+    - name: tap-csv
+      namespace: tap_csv
+      pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+      executable: tap-csv
+      capabilities:
+        - state
+        - catalog
+        - discover
+      settings:
+        - name: csv_files_definition
+          kind: array
+      config:
+        csv_files_definition:
+          - entity: prediction_logs
+            path: /app/data/exports/prediction_logs.csv
+            keys:
+              - prediction_id
+          - entity: drift_metrics
+            path: /app/data/exports/drift_metrics.csv
+            keys:
+              - id
+
+    - name: tap-postgres
+      variant: meltanolabs
+      pip_url: git+https://github.com/MeltanoLabs/tap-postgres.git
+      config:
+        host: postgres
+        port: 5432
+        database: mlops_db
+        user: mlops
+        password: mlops_secret
+        filter_schemas:
+          - public
+
+  loaders:
+    - name: target-postgres
+      variant: meltanolabs
+      pip_url: git+https://github.com/MeltanoLabs/target-postgres.git
+      config:
+        host: postgres
+        port: 5432
+        database: mlops_db
+        user: mlops
+        password: mlops_secret
+        default_target_schema: meltano_staging
+
+schedules:
+  - name: daily-prediction-export
+    extractor: tap-csv
+    loader: target-postgres
+    interval: "@daily"
+    start_date: "2024-01-01T00:00:00Z"
+
+jobs:
+  - name: export-predictions-to-staging
+    tasks:
+      - tap-csv target-postgres

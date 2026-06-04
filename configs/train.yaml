@@ -1,0 +1,80 @@
+# Training Configuration
+# ──────────────────────────────────────────────────────────────
+
+experiment_name: "skin-severity-experiment"
+run_name: "resnet18-severity-v1"
+
+# Model settings (overrides model.yaml defaults)
+backbone: "resnet18"
+pretrained: true
+num_classes: 3
+dropout: 0.3
+
+# Training hyperparameters
+max_epochs: 20
+learning_rate: 0.001
+weight_decay: 0.0001
+batch_size: 16
+num_workers: 2
+
+# Early stopping
+patience: 5
+min_delta: 0.001
+
+# Optimizer
+optimizer: "adam"  # adam | sgd | adamw
+
+# Scheduler
+scheduler: "cosine"  # cosine | step | none
+warmup_epochs: 2
+
+# Data
+image_size: 224
+data_dir: "data/processed"
+raw_data_dir: "data/raw"
+csv_manifest: null  # Set to path if using CSV-based loading, e.g. "data/processed/manifest.csv"
+
+# Train/val/test splits (if folder-based, no CSV)
+val_split: 0.15
+test_split: 0.10
+seed: 42
+
+# Augmentation (training)
+augmentations:
+  random_horizontal_flip: true
+  random_rotation_degrees: 15
+  color_jitter:
+    brightness: 0.2
+    contrast: 0.2
+    saturation: 0.2
+    hue: 0.1
+  random_resized_crop:
+    scale: [0.7, 1.0]
+    ratio: [0.75, 1.33]
+
+# Normalization (ImageNet stats)
+normalize:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+# MLflow
+mlflow:
+  tracking_uri: "http://mlflow:5000"
+  artifact_location: "s3://mlflow-artifacts"
+  register_model: true
+  model_name: "skin-severity-classifier"
+
+# Checkpointing
+checkpoint_dir: "artifacts"
+save_top_k: 1
+monitor_metric: "val/f1_macro"
+monitor_mode: "max"
+
+# Precision (use "16-mixed" for GPU, "32" for CPU)
+precision: "32"
+
+# Logging verbosity
+log_every_n_steps: 5
+
+# Seed for reproducibility
+deterministic: true

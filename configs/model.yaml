@@ -1,0 +1,32 @@
+# Model Architecture Configuration
+# ──────────────────────────────────────────────────────────────
+
+# Backbone / encoder
+backbone: "resnet18"  # resnet18 | resnet50 | efficientnet_b0 | efficientnet_b2
+
+# ImageNet pretrained weights
+pretrained: true
+
+# Output classes
+num_classes: 3
+
+# Class labels (ordered by class index)
+class_names:
+  - "mild"
+  - "moderate"
+  - "severe"
+
+# Dropout before final classifier head
+dropout: 0.3
+
+# Feature extraction vs fine-tuning
+freeze_backbone: false        # Set true to only train the head
+freeze_until_epoch: 0         # Unfreeze backbone after this many epochs (0 = never freeze)
+
+# Input image size (height x width)
+input_size: [224, 224]
+
+# Normalization statistics (ImageNet defaults)
+normalize:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]

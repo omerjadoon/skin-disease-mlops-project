@@ -1,0 +1,67 @@
+# Data Configuration
+# ──────────────────────────────────────────────────────────────
+
+# Directories
+raw_data_dir: "data/raw"
+processed_data_dir: "data/processed"
+sample_data_dir: "data/sample"
+
+# Dataset loading mode: "folder" or "csv"
+# - folder: expects data/raw/mild/, data/raw/moderate/, data/raw/severe/
+# - csv: expects a CSV file at csv_manifest path
+dataset_mode: "folder"
+
+# CSV manifest path (only used when dataset_mode = "csv")
+csv_manifest: "data/processed/manifest.csv"
+
+# CSV column names
+csv_columns:
+  image_path: "image_path"
+  severity: "severity"
+  disease_label: "disease_label"
+  patient_id: "patient_id"
+  split: "split"
+
+# Class labels (must match folder names when using folder mode)
+class_names:
+  - "mild"
+  - "moderate"
+  - "severe"
+
+# Disease labels (optional metadata, not used in base classifier)
+disease_labels:
+  - "acne"
+  - "eczema"
+  - "psoriasis"
+  - "dermatitis"
+  - "melanoma-like lesion"
+  - "unknown"
+
+# Image settings
+image_size: 224
+image_channels: 3
+
+# Dataset splits (applied when auto-splitting folder-mode dataset)
+val_split: 0.15
+test_split: 0.10
+seed: 42
+
+# Data loader settings
+num_workers: 2
+pin_memory: false  # Set true when using GPU
+
+# Normalization (ImageNet stats)
+normalize:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+
+# Sample dataset generation settings (for scripts/seed_sample_data.py)
+sample:
+  images_per_class: 30
+  image_width: 224
+  image_height: 224
+  add_noise: true
+  disease_labels_per_class:
+    mild: ["acne", "eczema"]
+    moderate: ["psoriasis", "dermatitis"]
+    severe: ["melanoma-like lesion", "psoriasis"]
