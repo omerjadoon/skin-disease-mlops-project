@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 
 import numpy as np
-import pytest
 import torch
 from PIL import Image
 
@@ -40,6 +39,7 @@ class TestInferencePipeline:
 
     def test_run_inference_output_format(self):
         from unittest.mock import MagicMock
+
         from api.inference import run_inference
 
         dummy_logits = torch.tensor([[2.0, 1.0, 0.5]])
@@ -63,6 +63,7 @@ class TestInferencePipeline:
 
     def test_run_inference_disclaimer_present(self):
         from unittest.mock import MagicMock
+
         from api.inference import run_inference
 
         mock_model = MagicMock(return_value=torch.tensor([[1.0, 2.0, 0.5]]))

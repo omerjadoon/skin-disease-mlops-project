@@ -11,9 +11,9 @@ import os
 import sys
 import time
 import uuid
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import AsyncGenerator
 
 import yaml
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
@@ -31,7 +31,6 @@ from api.schemas import (
     PredictionLog,
     PredictionResponse,
 )
-
 
 # ─── Config ───────────────────────────────────────────────────
 
@@ -277,7 +276,7 @@ async def predict(request: Request, file: UploadFile = File(...)) -> PredictionR
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Inference failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Inference failed: {e!s}") from e
 
     latency_ms = (time.perf_counter() - start_time) * 1000
     prediction_id = str(uuid.uuid4())
@@ -321,7 +320,7 @@ async def root() -> dict:
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {str(exc)}"},
+        content={"detail": f"Internal server error: {exc!s}"},
     )
 
 

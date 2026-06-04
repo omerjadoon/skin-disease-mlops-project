@@ -6,7 +6,7 @@ DISCLAIMER: For educational/research purposes only. Not a medical diagnosis tool
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -80,7 +80,7 @@ class SkinSeverityClassifier(pl.LightningModule):
         weight_decay: float = 1e-4,
         optimizer: str = "adam",
         scheduler: str = "cosine",
-        class_names: Optional[list[str]] = None,
+        class_names: list[str] | None = None,
         freeze_backbone: bool = False,
         **kwargs: Any,
     ) -> None:

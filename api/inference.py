@@ -14,7 +14,6 @@ from PIL import Image
 
 from api.schemas import DISCLAIMER, PredictionResponse
 
-
 CLASS_NAMES = ["mild", "moderate", "severe"]
 
 # Default inference transforms (ImageNet normalization, no augmentation)

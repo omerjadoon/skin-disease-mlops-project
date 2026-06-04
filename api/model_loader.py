@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-import torch
 import yaml
 
 
@@ -18,14 +17,14 @@ class ModelLoader:
     """Loads and caches the skin severity classifier for inference."""
 
     def __init__(self) -> None:
-        self.model: Optional[Any] = None
+        self.model: Any | None = None
         self.model_name: str = os.environ.get("MODEL_NAME", "skin-severity-classifier")
         self.model_stage: str = os.environ.get("MODEL_STAGE", "Production")
         self.model_version: str = "unknown"
         self.model_info: dict[str, Any] = {}
         self._loaded: bool = False
 
-    def load(self, config: Optional[dict[str, Any]] = None) -> bool:
+    def load(self, config: dict[str, Any] | None = None) -> bool:
         """
         Load model from MLflow registry or local checkpoint.
 

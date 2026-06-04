@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -78,7 +77,7 @@ def compute_performance_report(
             "p99": round(float(np.percentile(latency_arr, 99)), 2),
             "max": round(float(np.max(latency_arr)), 2),
         },
-        "model_versions": list(set(p.get("model_version", "unknown") for p in predictions)),
+        "model_versions": list({p.get("model_version", "unknown") for p in predictions}),
     }
 
 

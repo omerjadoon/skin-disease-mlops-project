@@ -42,7 +42,6 @@ def main() -> None:
         import lightning as pl  # type: ignore[no-redef]
 
     import mlflow
-    import torch
 
     from training.datamodule import SkinDataModule
     from training.model import SkinSeverityClassifier

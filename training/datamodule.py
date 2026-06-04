@@ -14,9 +14,8 @@ Expected CSV structure:
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 import torch
@@ -30,8 +29,7 @@ except ImportError:
 
 import torchvision.transforms as T
 
-from training.transforms import build_transforms_from_config, get_val_transforms
-
+from training.transforms import build_transforms_from_config
 
 CLASS_NAMES = ["mild", "moderate", "severe"]
 CLASS_TO_IDX = {c: i for i, c in enumerate(CLASS_NAMES)}
@@ -44,7 +42,7 @@ class FolderSkinDataset(Dataset):
         self,
         root_dir: str | Path,
         class_names: list[str],
-        transform: Optional[T.Compose] = None,
+        transform: T.Compose | None = None,
     ) -> None:
         self.root_dir = Path(root_dir)
         self.class_names = class_names
@@ -80,9 +78,9 @@ class CSVSkinDataset(Dataset):
         self,
         csv_path: str | Path,
         class_names: list[str],
-        split: Optional[str] = None,
-        transform: Optional[T.Compose] = None,
-        image_root: Optional[str | Path] = None,
+        split: str | None = None,
+        transform: T.Compose | None = None,
+        image_root: str | Path | None = None,
     ) -> None:
         self.class_names = class_names
         self.class_to_idx = {c: i for i, c in enumerate(class_names)}
@@ -133,22 +131,22 @@ class SkinDataModule(pl.LightningDataModule):
         self.dataset_mode: str = cfg.get("dataset_mode", "folder")
         self.raw_data_dir: str = cfg.get("raw_data_dir", "data/raw")
         self.processed_data_dir: str = cfg.get("processed_data_dir", "data/processed")
-        self.csv_manifest: Optional[str] = cfg.get("csv_manifest")
+        self.csv_manifest: str | None = cfg.get("csv_manifest")
 
-        self.train_dataset: Optional[Dataset] = None
-        self.val_dataset: Optional[Dataset] = None
-        self.test_dataset: Optional[Dataset] = None
+        self.train_dataset: Dataset | None = None
+        self.val_dataset: Dataset | None = None
+        self.test_dataset: Dataset | None = None
 
         # Build transforms
         self.train_transform, self.val_transform = build_transforms_from_config(cfg)
 
-    def setup(self, stage: Optional[str] = None) -> None:
+    def setup(self, stage: str | None = None) -> None:
         if self.dataset_mode == "csv" and self.csv_manifest:
             self._setup_csv(stage)
         else:
             self._setup_folder(stage)
 
-    def _setup_folder(self, stage: Optional[str] = None) -> None:
+    def _setup_folder(self, stage: str | None = None) -> None:
         """Load from folder structure: raw_data_dir/class_name/image.jpg"""
         # Try processed dir first, fall back to raw
         data_dir = self.processed_data_dir
@@ -180,7 +178,7 @@ class SkinDataModule(pl.LightningDataModule):
         self.val_dataset = _TransformDataset(val_ds, self.val_transform)
         self.test_dataset = _TransformDataset(test_ds, self.val_transform)
 
-    def _setup_csv(self, stage: Optional[str] = None) -> None:
+    def _setup_csv(self, stage: str | None = None) -> None:
         """Load from CSV manifest with pre-defined splits."""
         image_root = self.processed_data_dir or self.raw_data_dir
         self.train_dataset = CSVSkinDataset(

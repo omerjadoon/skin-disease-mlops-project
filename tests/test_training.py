@@ -3,9 +3,7 @@ Tests for the training pipeline: dataset loading, transforms, model forward pass
 """
 from __future__ import annotations
 
-import io
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -97,7 +95,7 @@ class TestFolderDataset:
         from training.transforms import get_val_transforms
         tf = get_val_transforms()
         ds = FolderSkinDataset(tmp_path, ["mild", "moderate", "severe"], transform=tf)
-        img, label = ds[0]
+        img, _label = ds[0]
         assert isinstance(img, torch.Tensor)
         assert img.shape == (3, 224, 224)
 

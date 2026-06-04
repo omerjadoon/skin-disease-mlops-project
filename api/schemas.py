@@ -8,10 +8,8 @@ It is NOT a medical diagnosis tool. For educational/research purposes only.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
-
 
 DISCLAIMER = (
     "AI-assisted severity estimate only. Not a medical diagnosis. "
@@ -51,11 +49,11 @@ class PredictionResponse(BaseModel):
         description="Version of the model used for inference",
         examples=["1"],
     )
-    prediction_id: Optional[str] = Field(
+    prediction_id: str | None = Field(
         default=None,
         description="Unique ID for this prediction (for audit trail)",
     )
-    latency_ms: Optional[float] = Field(
+    latency_ms: float | None = Field(
         default=None,
         description="Inference latency in milliseconds",
     )
@@ -91,7 +89,7 @@ class ModelInfoResponse(BaseModel):
     num_classes: int = Field(..., examples=[3])
     class_names: list[str] = Field(..., examples=[["mild", "moderate", "severe"]])
     input_size: list[int] = Field(..., examples=[[224, 224]])
-    mlflow_tracking_uri: Optional[str] = Field(default=None)
+    mlflow_tracking_uri: str | None = Field(default=None)
     disclaimer: str = Field(default=DISCLAIMER)
 
 
@@ -106,5 +104,5 @@ class PredictionLog(BaseModel):
     model_name: str
     model_version: str
     latency_ms: float
-    prediction_id: Optional[str] = None
-    source_ip: Optional[str] = None
+    prediction_id: str | None = None
+    source_ip: str | None = None

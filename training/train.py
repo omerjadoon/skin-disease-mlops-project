@@ -72,7 +72,6 @@ def main() -> None:
     print("=" * 60)
 
     # Import here to avoid slow startup for --help
-    import torch
 
     try:
         import pytorch_lightning as pl

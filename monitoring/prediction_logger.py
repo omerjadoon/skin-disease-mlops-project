@@ -7,13 +7,13 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import psycopg2
 import psycopg2.extras
 
 
-def get_db_connection(db_config: Optional[dict[str, Any]] = None):
+def get_db_connection(db_config: dict[str, Any] | None = None):
     """Create a PostgreSQL connection from environment variables or config dict."""
     cfg = db_config or {}
     return psycopg2.connect(
@@ -85,7 +85,7 @@ def ensure_tables(conn) -> None:
 def log_prediction(
     conn,
     *,
-    prediction_id: Optional[str] = None,
+    prediction_id: str | None = None,
     image_hash: str,
     predicted_class: str,
     confidence: float,
@@ -93,8 +93,8 @@ def log_prediction(
     model_name: str,
     model_version: str,
     latency_ms: float,
-    source_ip: Optional[str] = None,
-    timestamp: Optional[datetime] = None,
+    source_ip: str | None = None,
+    timestamp: datetime | None = None,
 ) -> None:
     """Insert a single prediction record."""
     ts = timestamp or datetime.utcnow()
@@ -128,7 +128,7 @@ def log_prediction(
 def fetch_recent_predictions(
     conn,
     hours: int = 24,
-    model_version: Optional[str] = None,
+    model_version: str | None = None,
 ) -> list[dict[str, Any]]:
     """Fetch prediction logs from the last N hours."""
     query = """
@@ -155,7 +155,7 @@ def log_drift_metric(
     baseline_window: str,
     current_window: str,
     drift_detected: bool,
-    model_version: Optional[str] = None,
+    model_version: str | None = None,
 ) -> None:
     """Insert a drift metric record."""
     with conn.cursor() as cur:
@@ -184,13 +184,13 @@ def log_model_performance(
     model_name: str,
     model_version: str,
     split: str = "test",
-    accuracy: Optional[float] = None,
-    f1_macro: Optional[float] = None,
-    precision_macro: Optional[float] = None,
-    recall_macro: Optional[float] = None,
-    auroc: Optional[float] = None,
-    loss: Optional[float] = None,
-    num_samples: Optional[int] = None,
+    accuracy: float | None = None,
+    f1_macro: float | None = None,
+    precision_macro: float | None = None,
+    recall_macro: float | None = None,
+    auroc: float | None = None,
+    loss: float | None = None,
+    num_samples: int | None = None,
 ) -> None:
     """Insert model evaluation metrics."""
     with conn.cursor() as cur:
