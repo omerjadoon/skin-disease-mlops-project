@@ -21,7 +21,7 @@ WORKDIR /app
 COPY pyproject.toml ./
 RUN pip install --upgrade pip && \
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
-    pip install pytorch-lightning torchmetrics mlflow boto3 pyyaml omegaconf \
+    pip install pytorch-lightning torchmetrics mlflow==2.11.1 boto3 pyyaml omegaconf \
         pandas scikit-learn scipy pillow psycopg2-binary python-dotenv && \
     rm -rf /root/.cache/pip
 

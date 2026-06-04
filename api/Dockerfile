@@ -16,7 +16,7 @@ COPY pyproject.toml ./
 RUN pip install --upgrade pip && \
     pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
     pip install fastapi "uvicorn[standard]" pydantic pydantic-settings \
-        mlflow boto3 psycopg2-binary pyyaml pillow python-multipart \
+        mlflow==2.11.1 boto3 psycopg2-binary pyyaml pillow python-multipart \
         python-dotenv pytorch-lightning torchmetrics && \
     rm -rf /root/.cache/pip
 
