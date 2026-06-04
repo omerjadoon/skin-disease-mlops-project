@@ -1,0 +1,12 @@
+[
+  {
+    "entity": "prediction_logs",
+    "path": "/app/data/exports/prediction_logs.csv",
+    "keys": ["prediction_id"]
+  },
+  {
+    "entity": "drift_metrics",
+    "path": "/app/data/exports/drift_metrics.csv",
+    "keys": ["id"]
+  }
+]

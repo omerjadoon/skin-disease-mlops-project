@@ -95,6 +95,11 @@ make build
 make up
 ```
 
+
+#### For Mac M1:
+python3 -c "import fiftyone as fo; session = fo.launch_app(); session.wait()"
+
+
 ### Step 3: Seed Synthetic Dataset
 Since no real medical data is checked into this repository, seed the folders with synthetic placeholder images:
 ```bash
@@ -205,3 +210,21 @@ This architecture is currently optimized for local demonstration:
 2. **Clinical Validation**: A real deployment requires clinical trials and FDA/CE-certification compliance.
 3. **Privacy**: Medical images must comply with HIPAA/GDPR regulations. High-standard data masking, consent forms, and secure access trails must be built around ingestion pipelines.
 4. **Data Sourcing**: Replace `seed_sample_data.py` with real skin lesion databases such as the ISIC (International Skin Imaging Collaboration) Archive.
+
+---
+
+## System in Action
+
+Here are some screenshots demonstrating the entire MLOps system in action:
+
+![Screenshot 1](screenshots/1.png)
+![Screenshot 2](screenshots/2.png)
+![Screenshot 3](screenshots/3.png)
+![Screenshot 4](screenshots/4.png)
+![Screenshot 5](screenshots/5.png)
+![Screenshot 6](screenshots/6.png)
+![Screenshot 7](screenshots/7.png)
+![Screenshot 8](screenshots/8.png)
+![Screenshot 9](screenshots/9.png)
+![Screenshot 10](screenshots/10.png)
+![Screenshot 11](screenshots/11.png)
